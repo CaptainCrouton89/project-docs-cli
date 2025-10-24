@@ -15,7 +15,11 @@ Codebase Architecture & Technical Guide
 
 ### Target Workflow
 ```
+Planning Phase:
 PRD → User Flows → User Stories → Feature Specs → System Design → API Contracts → Data Plan → Design Spec
+
+Implementation Phase (per feature):
+Investigation → Requirements → Plan → Implementation
 ```
 
 ---
@@ -75,6 +79,18 @@ docs/
 - Features: `F-01`, `F-02`, etc. (defined in PRD)
 - Stories: `US-101`, `US-102`, etc. (defined in story files)
 - Files: kebab-case (e.g., `admin-dashboard.yaml`)
+
+### Document Type Purposes
+
+**Planning & Investigation Documents:**
+- `requirements/*.yaml` - Detailed requirements for features including edge cases, functional requirements, data requirements, API endpoints, UI states, accessibility, and responsive behavior. Links to feature specs and user stories.
+- `investigations/*.yaml` - Context bundles that document the current system state when implementing a feature. Includes key files, data flow, patterns, integration points, and gotchas discovered during investigation.
+- `plans/*.yaml` - Implementation plans with task breakdown, dependencies, exit criteria, and agent assignments. Created after investigation, used to guide execution.
+
+**Workflow:**
+```
+Investigation → Requirements → Plan → Implementation
+```
 
 ---
 
