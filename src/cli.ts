@@ -42,9 +42,28 @@ program
 
 // List command
 const listCommand = program
-  .command('list <type>')
+  .command('list [type]')
   .description('List documentation by type: features, apis, stories, flows')
-  .action((type, options) => {
+  .addHelpText('after', `
+Valid types:
+  features    List all feature specifications
+  apis        List all API endpoints
+  stories     List all user stories
+  flows       List all user flows`)
+  .action((type: string | undefined, options) => {
+    if (!type) {
+      console.log('Error: Missing required argument: type');
+      console.log('');
+      console.log('Valid types:');
+      console.log('  features    List all feature specifications');
+      console.log('  apis        List all API endpoints');
+      console.log('  stories     List all user stories');
+      console.log('  flows       List all user flows');
+      console.log('');
+      console.log('Usage: pdocs list <type> [options]');
+      process.exit(1);
+    }
+
     const docsDir = findDocsDir();
     if (!docsDir) {
       console.log('Error: Could not find docs/ directory');
@@ -57,7 +76,14 @@ const listCommand = program
     const validTypes = ['features', 'apis', 'stories', 'flows'];
     if (!validTypes.includes(type)) {
       console.log(`Error: Invalid list type '${type}'`);
-      console.log(`Valid types: ${validTypes.join(', ')}`);
+      console.log('');
+      console.log('Valid types:');
+      console.log('  features    List all feature specifications');
+      console.log('  apis        List all API endpoints');
+      console.log('  stories     List all user stories');
+      console.log('  flows       List all user flows');
+      console.log('');
+      console.log('Usage: pdocs list <type> [options]');
       process.exit(1);
     }
 
@@ -118,11 +144,59 @@ program
     info(docsDir);
   });
 
-// Template command
-program
-  .command('template <type>')
+// Template command - create with custom error handling
+const templateCommand = program
+  .command('template [type]')
   .description('Get template for documentation type')
-  .action((type) => {
+  .addHelpText('after', `
+Valid template types:
+  Root documents:
+    product-requirements    Product Requirements Document
+    system-design           System Design Document
+    api-contracts           API Contracts (OpenAPI)
+    data-plan               Data Plan (Analytics & Events)
+    design-spec             Design Specification
+
+  Multi-file documents:
+    user-flow               User Flow Template
+    user-story              User Story Template
+    feature-spec            Feature Specification Template
+    requirements            Feature Requirements Template
+
+  Planning & Investigation:
+    investigation-topic     Investigation/Context Template
+    plan                    Implementation Plan Template
+
+  Meta:
+    claude                  CLAUDE.md Quick Reference`)
+  .action((type?: string) => {
+    if (!type) {
+      console.log('Error: Missing required argument: type');
+      console.log('');
+      console.log('Valid template types:');
+      console.log('  Root documents:');
+      console.log('    product-requirements    Product Requirements Document');
+      console.log('    system-design           System Design Document');
+      console.log('    api-contracts           API Contracts (OpenAPI)');
+      console.log('    data-plan               Data Plan (Analytics & Events)');
+      console.log('    design-spec             Design Specification');
+      console.log('');
+      console.log('  Multi-file documents:');
+      console.log('    user-flow               User Flow Template');
+      console.log('    user-story              User Story Template');
+      console.log('    feature-spec            Feature Specification Template');
+      console.log('    requirements            Feature Requirements Template');
+      console.log('');
+      console.log('  Planning & Investigation:');
+      console.log('    investigation-topic     Investigation/Context Template');
+      console.log('    plan                    Implementation Plan Template');
+      console.log('');
+      console.log('  Meta:');
+      console.log('    claude                  CLAUDE.md Quick Reference');
+      console.log('');
+      console.log('Usage: pdocs template <type>');
+      process.exit(1);
+    }
     template(type);
   });
 

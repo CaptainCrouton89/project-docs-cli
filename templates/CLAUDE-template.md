@@ -1,7 +1,4 @@
-# [Directory/Module Name]
-
-## Purpose
-[1 line: What this directory/module handles]
+[2 sentences - What this document is for, and what this directory/module handles]
 
 ## Key Patterns
 - [Pattern 1]: [Brief description]

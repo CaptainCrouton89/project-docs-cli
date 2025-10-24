@@ -12,7 +12,8 @@ type TemplateType =
   | 'feature-spec'
   | 'requirements'
   | 'investigation-topic'
-  | 'plan';
+  | 'plan'
+  | 'claude';
 
 const TEMPLATE_MAP: Record<TemplateType, string> = {
   'product-requirements': 'product-requirements.yaml',
@@ -26,6 +27,7 @@ const TEMPLATE_MAP: Record<TemplateType, string> = {
   'requirements': 'requirements.yaml',
   'investigation-topic': 'investigation-topic.yaml',
   'plan': 'plan.yaml',
+  'claude': 'CLAUDE-template.md',
 };
 
 export function template(type: string): void {
@@ -51,6 +53,9 @@ export function template(type: string): void {
     console.log('  Planning & Investigation:');
     console.log('    investigation-topic     Investigation/Context Template');
     console.log('    plan                    Implementation Plan Template');
+    console.log('');
+    console.log('  Meta:');
+    console.log('    claude                  CLAUDE.md Quick Reference');
     process.exit(1);
   }
 
