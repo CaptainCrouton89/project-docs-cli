@@ -1,0 +1,50 @@
+project_name: "Example Documentation Project"
+goal: "Build a scalable web application with authentication and analytics"
+
+tech_stack:
+  frontend:
+    - "React 18"
+    - "TypeScript"
+    - "Tailwind CSS"
+  backend:
+    - "Node.js"
+    - "Express"
+    - "PostgreSQL"
+  infrastructure:
+    - "Docker"
+    - "AWS (EC2, RDS)"
+    - "Redis for caching"
+
+components:
+  - name: "Web Application"
+    type: "frontend"
+    description: "React-based SPA with responsive design"
+    dependencies:
+      - "API Server"
+
+  - name: "API Server"
+    type: "backend"
+    description: "RESTful API handling authentication and data access"
+    dependencies:
+      - "Database"
+      - "Cache Layer"
+
+  - name: "Database"
+    type: "storage"
+    description: "PostgreSQL database for persistent data"
+
+  - name: "Cache Layer"
+    type: "storage"
+    description: "Redis cache for session management and frequently accessed data"
+
+architecture_patterns:
+  - "Monolithic backend with modular service layer"
+  - "Token-based authentication (JWT)"
+  - "RESTful API design"
+  - "Database migrations with version control"
+
+scalability_considerations:
+  - "Horizontal scaling of API servers behind load balancer"
+  - "Database read replicas for analytics queries"
+  - "CDN for static assets"
+  - "Redis cluster for distributed caching"

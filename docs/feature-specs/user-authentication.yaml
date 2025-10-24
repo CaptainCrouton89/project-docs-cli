@@ -1,0 +1,44 @@
+feature_id: "F-01"
+title: "User Authentication"
+status: "in-progress"
+
+summary: "Comprehensive authentication system supporting email/password and OAuth providers"
+
+functional_overview:
+  - "User registration with email verification"
+  - "Secure password hashing (bcrypt)"
+  - "Session management with JWT tokens"
+  - "OAuth integration (Google, GitHub)"
+  - "Password reset flow"
+
+implementation_status:
+  completed:
+    - "Database schema for users table"
+    - "Password hashing utilities"
+    - "JWT token generation"
+  in_progress:
+    - "OAuth provider integration"
+    - "Email verification system"
+  not_started:
+    - "Password reset flow"
+    - "Two-factor authentication"
+
+api_endpoints:
+  - method: "POST"
+    path: "/api/auth/register"
+    description: "Register new user account"
+  - method: "POST"
+    path: "/api/auth/login"
+    description: "Authenticate user credentials"
+  - method: "POST"
+    path: "/api/auth/logout"
+    description: "Invalidate user session"
+  - method: "GET"
+    path: "/api/auth/verify"
+    description: "Verify email token"
+
+qa_criteria:
+  - "Password must meet complexity requirements"
+  - "Failed login attempts are rate-limited"
+  - "Sessions expire after 24 hours"
+  - "Email verification tokens expire after 1 hour"

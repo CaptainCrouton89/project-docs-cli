@@ -1,0 +1,33 @@
+project_name: "Example Documentation Project"
+version: "1.0.0"
+summary: "This is an example documentation structure for testing the project-docs-cli tool"
+goal: "Demonstrate the complete documentation structure and validate tool functionality"
+
+features:
+  - feature_id: "F-01"
+    title: "User Authentication"
+    description: "Enable users to create accounts and log in securely"
+    priority: "high"
+
+  - feature_id: "F-02"
+    title: "Dashboard Analytics"
+    description: "Display key metrics and visualizations on user dashboard"
+    priority: "medium"
+
+  - feature_id: "F-03"
+    title: "Export Functionality"
+    description: "Allow users to export data in various formats"
+    priority: "low"
+
+stakeholders:
+  - name: "Product Team"
+    role: "Requirements Definition"
+  - name: "Engineering Team"
+    role: "Implementation"
+  - name: "QA Team"
+    role: "Validation"
+
+success_criteria:
+  - "All features have complete specifications"
+  - "Cross-references are valid"
+  - "Documentation generates without errors"

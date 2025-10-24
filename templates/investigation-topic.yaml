@@ -1,0 +1,43 @@
+# Investigation: [Topic]
+# Context bundle for implementing [feature/fix]
+
+title: # Investigation title
+goal: # One sentence: what we're building or fixing
+
+relatedDocs:                                     # OPTIONAL
+  features: # Feature spec references (e.g., docs/feature-spec/slug.md – F-##)
+  systemDesign: # System design sections
+  apiContracts: # API endpoints
+  other: # Other related documentation
+
+keyFiles:                                        # OPTIONAL
+  entryPoints: # Where user/system triggers this (e.g., path/to/entry.ts:45)
+  coreLogic: # Main implementation files (e.g., path/to/service.ts:89-145)
+  uiComponents: # UI components if applicable
+  apiDatabase: # API routes and database models
+  configuration: # Config and constants
+  tests: # Test files and coverage areas
+  utilities: # Shared utilities and helpers
+
+databaseTables:                                  # OPTIONAL - List of relevant tables with columns and purpose
+  # - table_name: columns and purpose description
+
+dataFlow:                                        # OPTIONAL - Step-by-step data transformation
+  # 1. Input: [source/shape] → file.ts:line
+  # 2. Validation → file.ts:line
+  # 3. Processing → file.ts:line
+  # 4. Database/API call → file.ts:line
+  # 5. Response/side effects → file.ts:line
+
+patterns:                                        # OPTIONAL
+  errorHandling: # Pattern found in file.ts:line
+  validation: # Pattern found in file.ts:line
+  authPermissions: # Pattern found in file.ts:line
+  naming: # Naming convention observed
+
+integrationPoints:                               # OPTIONAL - External services, related features, shared state
+  # - [External service/API] via file.ts:line
+  # - [Related feature] at file.ts:line
+  # - [Shared state/events] in file.ts:line
+
+notes:                                           # OPTIONAL - Gotchas, edge cases, performance/security considerations

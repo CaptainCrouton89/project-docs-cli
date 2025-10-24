@@ -1,0 +1,81 @@
+project_name: "Example Documentation Project"
+description: "UI/UX design specifications and guidelines"
+
+design_goals:
+  - "Clean, modern interface"
+  - "Consistent user experience"
+  - "Mobile-first responsive design"
+  - "Accessibility compliance (WCAG 2.1 AA)"
+
+color_palette:
+  primary:
+    name: "Brand Blue"
+    hex: "#3B82F6"
+    usage: "Primary actions, links, active states"
+  secondary:
+    name: "Brand Purple"
+    hex: "#8B5CF6"
+    usage: "Secondary actions, highlights"
+  neutral:
+    - name: "Gray 50"
+      hex: "#F9FAFB"
+    - name: "Gray 900"
+      hex: "#111827"
+  semantic:
+    success: "#10B981"
+    warning: "#F59E0B"
+    error: "#EF4444"
+    info: "#3B82F6"
+
+typography:
+  font_family:
+    primary: "Inter, system-ui, sans-serif"
+    monospace: "Fira Code, monospace"
+  scale:
+    - size: "12px"
+      weight: "400"
+      usage: "Caption text"
+    - size: "14px"
+      weight: "400"
+      usage: "Body text"
+    - size: "16px"
+      weight: "500"
+      usage: "Headings, buttons"
+    - size: "24px"
+      weight: "700"
+      usage: "Page titles"
+
+spacing:
+  system: "4px base unit"
+  scale: [4, 8, 12, 16, 24, 32, 48, 64]
+
+components:
+  - name: "Button"
+    variants: ["primary", "secondary", "ghost"]
+    states: ["default", "hover", "active", "disabled"]
+
+  - name: "Input"
+    variants: ["text", "email", "password"]
+    states: ["default", "focus", "error", "disabled"]
+
+  - name: "Card"
+    description: "Container for grouped content"
+    padding: "24px"
+    border_radius: "8px"
+    shadow: "0 1px 3px rgba(0,0,0,0.1)"
+
+interaction_patterns:
+  - pattern: "Form Validation"
+    description: "Inline validation with error messages below fields"
+
+  - pattern: "Loading States"
+    description: "Skeleton screens for content loading, spinners for actions"
+
+  - pattern: "Notifications"
+    description: "Toast notifications in top-right corner, auto-dismiss after 5s"
+
+responsive_breakpoints:
+  mobile: "640px"
+  tablet: "768px"
+  desktop: "1024px"
+  wide: "1280px"

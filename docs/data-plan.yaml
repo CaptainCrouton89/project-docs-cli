@@ -1,0 +1,58 @@
+project_name: "Example Documentation Project"
+description: "Analytics and data tracking plan"
+
+data_sources:
+  - name: "User Events"
+    type: "application_logs"
+    description: "User interactions tracked via frontend"
+
+  - name: "API Metrics"
+    type: "server_logs"
+    description: "API endpoint performance and usage"
+
+  - name: "Database Metrics"
+    type: "database_logs"
+    description: "Query performance and database health"
+
+events:
+  - event_name: "user_registered"
+    description: "Fired when new user completes registration"
+    properties:
+      - name: "user_id"
+        type: "string"
+      - name: "registration_method"
+        type: "string"
+        values: ["email", "oauth_google", "oauth_github"]
+      - name: "timestamp"
+        type: "datetime"
+
+  - event_name: "user_login"
+    description: "Fired when user successfully logs in"
+    properties:
+      - name: "user_id"
+        type: "string"
+      - name: "login_method"
+        type: "string"
+      - name: "timestamp"
+        type: "datetime"
+
+  - event_name: "dashboard_viewed"
+    description: "Fired when user views dashboard"
+    properties:
+      - name: "user_id"
+        type: "string"
+      - name: "widgets_displayed"
+        type: "array"
+      - name: "load_time_ms"
+        type: "number"
+      - name: "timestamp"
+        type: "datetime"
+
+metrics:
+  - metric_name: "daily_active_users"
+    description: "Unique users who logged in within 24 hours"
+    calculation: "COUNT(DISTINCT user_id) WHERE event = 'user_login' AND timestamp > NOW() - INTERVAL '24 hours'"
+
+  - metric_name: "average_dashboard_load_time"
+    description: "Average time to load dashboard in milliseconds"
+    calculation: "AVG(load_time_ms) WHERE event = 'dashboard_viewed'"

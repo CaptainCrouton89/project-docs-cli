@@ -1,0 +1,79 @@
+# Implementation Plan – <Identifier>
+
+# Overview
+overview:
+  related_items:
+    feature_specs: []
+    user_stories: []
+    user_flows: []
+  related_docs: |
+    - "docs/[feature-slug]/*.yaml"
+    - "docs/external/*.md"
+    - "docs/other-docs/*.md"
+
+# Problem (for fixes/refactors)
+problem: |
+  # Brief description of the problem or current state
+
+# Solution
+solution: |
+  # 3-5 sentence description of the solution
+
+# Current System
+current_system:
+  description: "[Brief: relevant files, current flows, where new code fits]"
+
+# Changes Required
+changes_required:
+  - path: "path/to/file.ts"
+    changes: |
+      - Add function `functionName()` that [specific behavior]
+      - Modify `existingFunction()` to [precise logic change]
+      - Update type definition for `TypeName` to include [new fields]
+      - Remove deprecated `oldFunction()` and replace calls with [alternative]
+
+  - path: "path/to/other.ts"
+    changes: |
+      - Add new component `ComponentName` with props: [list key props]
+      - Update `ExistingComponent` to handle [specific case]
+      - Add state management for [specific state] using [approach]
+      - Refactor `helperFunction()` to [specific change in logic]
+
+# Task Breakdown
+task_breakdown:
+  - id: "T1"
+    description: "[What & why, 2-3 sentences]"
+    agent: "[programmer | junior-engineer | orchestrator | context-engineer | senior-engineer]"
+    depends_on: []
+    files:
+    - "path/to/file"
+    exit_criteria: "[criteria]"
+
+  - id: "T2"
+    description: "[What & why, 2-3 sentences]"
+    agent: "[programmer | junior-engineer | orchestrator | context-engineer | senior-engineer]"
+    depends_on: ["T1", ...]
+    files:
+    - "path/to/file"
+    exit_criteria: "[criteria]"
+
+# Data/Schema Changes (if any)
+data_schema_changes:
+  migrations:
+    - file: "[file]"
+      summary: "[summary]"
+  api_changes:
+    - endpoint: "[endpoint]"
+      changes: "[changes]"
+
+# Expected Result
+expected_result:
+  outcome: "[Explicit observable outcome]"
+  example: "[Concrete example of previously missing detail now captured]"
+
+# Notes (optional)
+notes:
+  - "[Links, context, related tickets]"
+
+# Next
+next: "/manage-project/implement/execute <item-id>"

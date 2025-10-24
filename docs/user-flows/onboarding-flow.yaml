@@ -1,0 +1,45 @@
+title: "User Onboarding Flow"
+description: "Complete journey from landing page to authenticated dashboard access"
+
+key_personas:
+  - "New User"
+  - "Returning User"
+
+primary_flows:
+  - name: "New User Registration"
+    steps:
+      - "Land on homepage"
+      - "Click 'Sign Up' button"
+      - "Enter email and password"
+      - "Submit registration form"
+      - "Receive verification email"
+      - "Click verification link"
+      - "Redirect to login page"
+      - "Enter credentials"
+      - "Access dashboard"
+
+  - name: "Returning User Login"
+    steps:
+      - "Navigate to login page"
+      - "Enter email and password"
+      - "Click 'Login' button"
+      - "Access dashboard"
+
+secondary_flows:
+  - name: "Password Reset"
+    steps:
+      - "Click 'Forgot Password' link"
+      - "Enter email address"
+      - "Receive reset email"
+      - "Click reset link"
+      - "Enter new password"
+      - "Confirm password change"
+      - "Redirect to login"
+
+alternate_paths:
+  - scenario: "Invalid credentials"
+    action: "Show error message and allow retry"
+  - scenario: "Unverified email"
+    action: "Show verification reminder with resend option"
+  - scenario: "Email already exists"
+    action: "Suggest login or password reset"

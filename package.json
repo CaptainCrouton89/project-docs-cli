@@ -1,0 +1,27 @@
+{
+  "name": "project-docs-cli",
+  "version": "1.0.0",
+  "description": "CLI tool for managing YAML-based project documentation",
+  "main": "dist/cli.js",
+  "bin": {
+    "pdocs": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "package": "npm install && npm run build && npm link"
+  },
+  "keywords": ["cli", "documentation", "yaml", "project-management"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/js-yaml": "latest",
+    "@types/node": "latest",
+    "typescript": "latest"
+  },
+  "dependencies": {
+    "commander": "latest",
+    "js-yaml": "latest"
+  }
+}

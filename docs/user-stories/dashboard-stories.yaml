@@ -1,0 +1,21 @@
+story_id: "US-201"
+feature_id: "F-02"
+title: "View Dashboard Metrics"
+status: "incomplete"
+
+as_a: "logged-in user"
+i_want: "to see my key metrics on a dashboard"
+so_that: "I can quickly understand my performance"
+
+acceptance_criteria:
+  - "Dashboard displays at least 4 key metrics"
+  - "Metrics are updated in real-time"
+  - "User can customize which metrics are displayed"
+  - "Dashboard is responsive on mobile devices"
+  - "Loading states are shown while data is fetching"
+
+dependencies:
+  - "User authentication must be complete"
+  - "Metrics API must be available"
+
+notes: "Initial version will show predefined metrics; customization comes later"
