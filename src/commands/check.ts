@@ -239,43 +239,39 @@ function checkSystemDesign(docsDir: string, verbose: boolean): void {
 }
 
 function checkApiContracts(docsDir: string, verbose: boolean): void {
-  const apiFile = join(docsDir, 'api-contracts.yaml');
+  const apiDir = join(docsDir, 'api-contracts');
 
   console.log('\n━━━ API Contracts ━━━');
 
-  if (!checkFileExists(apiFile, 'API Contracts', verbose, 'api-contracts')) {
+  if (!existsSync(apiDir)) {
+    logError(`API contracts directory missing: ${apiDir}`, 'Get template with: pdocs template api-contract');
     return;
   }
 
-  const data = loadYaml(apiFile);
-  if (data) {
-    const paths = data.paths as Record<string, unknown> | undefined;
-    const endpointCount = paths ? Object.keys(paths).length : 0;
-    logInfo(`API endpoints defined: ${endpointCount}`, verbose);
+  const apiFiles = findYamlFiles(apiDir);
+  logInfo(`API contract files found: ${apiFiles.length}`, verbose);
 
-    if (endpointCount === 0) {
-      logWarn('No API endpoints defined');
-    }
-  }
-}
-
-function checkDataPlan(docsDir: string, verbose: boolean): void {
-  const dataFile = join(docsDir, 'data-plan.yaml');
-
-  console.log('\n━━━ Data Plan ━━━');
-
-  if (!checkFileExists(dataFile, 'Data Plan', verbose, 'data-plan')) {
+  if (apiFiles.length === 0) {
+    logWarn('No API contract files found');
     return;
   }
 
-  const data = loadYaml(dataFile);
-  if (data) {
-    const dataSources = getArray(data, 'data_sources');
-    if (dataSources.length > 0) {
-      logInfo(`Data sources defined: ${dataSources.length}`, verbose);
+  apiFiles.forEach(apiFile => {
+    const data = loadYaml(apiFile);
+    if (!data) return;
+
+    const method = getString(data, 'method');
+    const summary = getString(data, 'summary');
+
+    if (!method || method === '""') {
+      logWarn(`API contract ${basename(apiFile)} missing method`);
     }
-  }
+    if (!summary || summary === '""') {
+      logWarn(`API contract ${basename(apiFile)} missing summary`);
+    }
+  });
 }
+
 
 function checkDesignSpec(docsDir: string, verbose: boolean): void {
   const designFile = join(docsDir, 'design-spec.yaml');
@@ -317,6 +313,7 @@ function checkCrossReferences(docsDir: string, checkLinks: boolean, verbose: boo
     return;
   }
 
+  // Check PRD features have specification files
   const featuresDir = join(docsDir, 'feature-specs');
   if (existsSync(featuresDir)) {
     const featureFiles = findYamlFiles(featuresDir);
@@ -339,6 +336,7 @@ function checkCrossReferences(docsDir: string, checkLinks: boolean, verbose: boo
     });
   }
 
+  // Check user stories reference valid features
   const storiesDir = join(docsDir, 'user-stories');
   if (existsSync(storiesDir)) {
     const storyFiles = findYamlFiles(storiesDir);
@@ -352,6 +350,34 @@ function checkCrossReferences(docsDir: string, checkLinks: boolean, verbose: boo
 
       if (featureRef && featureRef !== 'F-##' && !featureIds.includes(featureRef)) {
         logWarn(`Story ${storyId} references unknown feature: ${featureRef}`);
+      }
+    });
+  }
+
+  // Check API contracts reference valid features
+  const apiDir = join(docsDir, 'api-contracts');
+  if (existsSync(apiDir)) {
+    const apiFiles = findYamlFiles(apiDir);
+
+    apiFiles.forEach(apiFile => {
+      const data = loadYaml(apiFile);
+      if (!data) return;
+
+      const method = getString(data, 'method').toUpperCase();
+      const featureRef = getString(data, 'feature_id');
+
+      // Extract path from file location
+      const pathMatch = apiFile.match(/\/paths\/(.+)\/api-contract\.yaml$/);
+      const path = pathMatch ? '/' + pathMatch[1].replace(/\[([^\]]+)\]/g, '{$1}') : basename(apiFile);
+
+      if (featureRef && featureRef !== 'F-##') {
+        logCheck(`Checking API ${method} ${path} → ${featureRef}`, verbose);
+
+        if (!featureIds.includes(featureRef)) {
+          logWarn(`API ${method} ${path} references unknown feature: ${featureRef}`);
+        } else {
+          logPass(`API ${method} ${path} linked to ${featureRef}`, verbose);
+        }
       }
     });
   }
@@ -389,8 +415,8 @@ function generateSummary(): number {
     console.log('');
     console.log('💡 Complete project documentation is essential for effective development.');
     console.log('   Get started with templates: pdocs template <type>');
-    console.log('   Available types: product-requirements, system-design, api-contracts,');
-    console.log('                    data-plan, design-spec, user-flow, user-story, feature-spec');
+    console.log('   Available types: product-requirements, system-design, api-contract,');
+    console.log('                    design-spec, user-flow, user-story, feature-spec');
     return 1;
   }
 }
@@ -416,7 +442,6 @@ export function check(
   checkFeatureSpecs(docsDir, options.verbose);
   checkSystemDesign(docsDir, options.verbose);
   checkApiContracts(docsDir, options.verbose);
-  checkDataPlan(docsDir, options.verbose);
   checkDesignSpec(docsDir, options.verbose);
   checkCrossReferences(docsDir, options.checkLinks, options.verbose);
 
