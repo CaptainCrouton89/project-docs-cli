@@ -12,7 +12,12 @@
     "prepublishOnly": "npm run build",
     "package": "npm install && npm run build && npm link"
   },
-  "keywords": ["cli", "documentation", "yaml", "project-management"],
+  "keywords": [
+    "cli",
+    "documentation",
+    "yaml",
+    "project-management"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -21,6 +26,7 @@
     "typescript": "latest"
   },
   "dependencies": {
+    "@r-cli/sdk": "^1.1.115",
     "commander": "latest",
     "js-yaml": "latest"
   }

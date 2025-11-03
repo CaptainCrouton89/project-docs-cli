@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@r-cli/sdk':
+        specifier: ^1.1.115
+        version: 1.1.115
       commander:
         specifier: latest
         version: 14.0.1
@@ -26,6 +29,10 @@ importers:
         version: 5.9.3
 
 packages:
+
+  '@r-cli/sdk@1.1.115':
+    resolution: {integrity: sha512-elNXkv+0dURbou8zCLkkWMGWFGI0kckkwfVzhCTKDYhxxtycuP4uf/CpuE08EVnvzI3LOFRU+PXWM0DUUPgHIA==}
+    engines: {node: '>=14.0.0'}
 
   '@types/js-yaml@4.0.9':
     resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
@@ -53,6 +60,8 @@ packages:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
 snapshots:
+
+  '@r-cli/sdk@1.1.115': {}
 
   '@types/js-yaml@4.0.9': {}
 

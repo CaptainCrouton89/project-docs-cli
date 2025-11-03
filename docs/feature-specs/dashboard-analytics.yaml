@@ -5,32 +5,22 @@ status: "incomplete"
 summary: "Real-time analytics dashboard with customizable widgets and data visualizations"
 
 functional_overview:
-  - "Display key performance metrics"
-  - "Interactive charts and graphs"
-  - "Customizable widget layout"
-  - "Real-time data updates"
-  - "Export dashboard as PDF"
+  core_logic: |
+    Display key performance metrics. Interactive charts and graphs.
+    Customizable widget layout. Real-time data updates via WebSocket.
+    Export dashboard as PDF.
+  integration_points:
+    - "Chart.js for visualizations"
+    - "WebSocket server for real-time updates"
+    - "PDF generation library"
 
 implementation_status:
-  completed: []
-  in_progress: []
-  not_started:
-    - "Widget framework"
-    - "Chart library integration"
-    - "Data aggregation pipeline"
-    - "Real-time WebSocket connections"
-    - "PDF export functionality"
+  progress: 0
+  completed_components: []
+  in_progress_components: []
+  blocked_items: []
 
-api_endpoints:
-  - method: "GET"
-    path: "/api/dashboard/metrics"
-    description: "Fetch aggregated metrics data"
-  - method: "GET"
-    path: "/api/dashboard/widgets"
-    description: "Get user's widget configuration"
-  - method: "PUT"
-    path: "/api/dashboard/widgets"
-    description: "Update widget layout"
+# API Endpoints: See docs/api-contracts/paths/posts/*.yaml
 
 qa_criteria:
   - "Dashboard loads within 2 seconds"

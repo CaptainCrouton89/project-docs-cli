@@ -2,12 +2,13 @@
 
 import { Command } from 'commander';
 import { join } from 'path';
-import { findDocsDir, ensureClaudeDoc } from './utils.js';
 import { check } from './commands/check.js';
-import { list } from './commands/list.js';
 import { generate } from './commands/generate.js';
 import { info } from './commands/info.js';
+import { init } from './commands/init.js';
+import { list } from './commands/list.js';
 import { template } from './commands/template.js';
+import { ensureClaudeDoc, findDocsDir } from './utils.js';
 
 const program = new Command();
 
@@ -95,10 +96,11 @@ listCommand.option('-a, --all', 'Show all items (default: only incomplete)', fal
 listCommand.option('--format <format>', 'Output format (varies by type)');
 listCommand.option('--status <status>', 'Filter by status: incomplete|in-progress|complete');
 listCommand.option('--sort <field>', 'Sort by field (features: id|status|title)');
+listCommand.option('--show-apis', 'Show API endpoints for each feature (features only)', false);
 listCommand.option('--method <method>', 'Filter APIs by HTTP method (GET|POST|PUT|DELETE|PATCH)');
 listCommand.option('--path <path>', 'Filter APIs by path pattern');
 listCommand.option('--base-url <url>', 'Base URL for curl commands', 'http://localhost:3000');
-listCommand.option('--feature <id>', 'Filter stories by feature ID');
+listCommand.option('--feature <id>', 'Filter by feature ID (stories/apis)');
 listCommand.option('--persona <name>', 'Filter flows by persona name');
 
 // Generate command
@@ -144,6 +146,14 @@ program
     info(docsDir);
   });
 
+// Init command
+program
+  .command('init')
+  .description('Initialize Claude commands from CLI to home directory (~/.claude/commands)')
+  .action(async () => {
+    await init();
+  });
+
 // Template command - create with custom error handling
 const templateCommand = program
   .command('template [type]')
@@ -153,15 +163,14 @@ Valid template types:
   Root documents:
     product-requirements    Product Requirements Document
     system-design           System Design Document
-    api-contracts           API Contracts (OpenAPI)
-    data-plan               Data Plan (Analytics & Events)
     design-spec             Design Specification
-
+    
   Multi-file documents:
     user-flow               User Flow Template
     user-story              User Story Template
     feature-spec            Feature Specification Template
     requirements            Feature Requirements Template
+    api-contract            API Contract Document
 
   Planning & Investigation:
     investigation-topic     Investigation/Context Template
@@ -177,11 +186,10 @@ Valid template types:
       console.log('  Root documents:');
       console.log('    product-requirements    Product Requirements Document');
       console.log('    system-design           System Design Document');
-      console.log('    api-contracts           API Contracts (OpenAPI)');
-      console.log('    data-plan               Data Plan (Analytics & Events)');
       console.log('    design-spec             Design Specification');
       console.log('');
       console.log('  Multi-file documents:');
+      console.log('    api-contract            API Contract (per endpoint)');
       console.log('    user-flow               User Flow Template');
       console.log('    user-story              User Story Template');
       console.log('    feature-spec            Feature Specification Template');

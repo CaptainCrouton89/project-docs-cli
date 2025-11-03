@@ -10,20 +10,16 @@ flow_ids: []                 # Which user flows this feature enables (e.g. ["aut
 functional_overview:
   core_logic: ""
   data_schema: ""
-  api_endpoints: []         # Endpoints implementing this feature (e.g. ["POST /auth/login", "GET /auth/user"])
   integration_points: []
 
 detailed_design:
   data_structures:
     - name: ""
       columns: []
-  apis:
-    - method: ""
-      endpoint: ""
-      request: ""
-      response: ""
-      errors: []
   diagrams: ""
+
+# API Endpoints: Create files in docs/api-contracts/paths/**/*.yaml
+# Each API contract should reference this feature via feature_id field
 
 data_events: []             # Events emitted by this feature (e.g. ["user_login_success"])
 

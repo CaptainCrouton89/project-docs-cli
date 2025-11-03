@@ -27,7 +27,7 @@ overview:
     - "docs/product-requirements.md - [Product context and goals]"
     - "docs/user-flows/[feature-slug].md - [User journey]"
     - "docs/feature-spec/[feature-slug].md - [Technical spec]"
-    - "docs/api-contracts.yaml - [API contracts]"
+    - "docs/api-contracts/paths/[endpoint]/api-contract.yaml - [API contracts]"
     - "docs/system-design.md - [Architecture]"
 
 # ============================================================================
@@ -69,7 +69,7 @@ functional_requirements:
     # [field_name] | [string/number/etc] | [yes/no] | [purpose] | [constraints]
 
   api_endpoints: |                               # OPTIONAL
-    # If applicable, reference api-contracts.yaml for full details
+    # If applicable, reference docs/api-contracts/paths/*/api-contract.yaml for full details
     # - POST /endpoint - [brief purpose]
     # - GET /endpoint/{id} - [brief purpose]
 
