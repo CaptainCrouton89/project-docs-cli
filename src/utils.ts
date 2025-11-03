@@ -26,7 +26,7 @@ export function findDocsDir(): string | null {
 }
 
 /**
- * Find YAML files in a directory
+ * Find YAML files in a directory (recursively searches subdirectories)
  */
 export function findYamlFiles(dir: string): string[] {
   if (!existsSync(dir)) {
@@ -35,10 +35,19 @@ export function findYamlFiles(dir: string): string[] {
 
   try {
     const entries = readdirSync(dir, { withFileTypes: true });
-    return entries
-      .filter(e => e.isFile() && (e.name.endsWith('.yaml') || e.name.endsWith('.yml')))
-      .map(e => join(dir, e.name))
-      .sort();
+    const files: string[] = [];
+
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        // Recursively search subdirectories
+        files.push(...findYamlFiles(fullPath));
+      } else if (entry.isFile() && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+        files.push(fullPath);
+      }
+    }
+
+    return files.sort();
   } catch {
     return [];
   }
