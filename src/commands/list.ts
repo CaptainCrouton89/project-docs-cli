@@ -36,7 +36,7 @@ function parseFeature(file: string): FeatureData | null {
 
 function listFeatures(
   docsDir: string,
-  options: { showAll: boolean; format: string; filterStatus: string; sortBy: string }
+  options: { showAll: boolean; format: string; filterStatus: string; sortBy: string; showApis: boolean }
 ): void {
   const featuresDir = join(docsDir, 'feature-specs');
   const files = findYamlFiles(featuresDir);
@@ -110,113 +110,50 @@ function listFeatures(
   console.log(`${'ID'.padEnd(10)} ${'Title'.padEnd(40)} ${'Progress'.padEnd(10)} Status`);
   console.log('━'.repeat(80));
 
+  // Get API contracts if --show-apis flag is set
+  let featureApis: Map<string, Array<{ method: string; path: string }>> | null = null;
+  if (options.showApis) {
+    featureApis = new Map();
+    const apiDir = join(docsDir, 'api-contracts');
+    const apiFiles = findYamlFiles(apiDir);
+
+    apiFiles.forEach(file => {
+      const data = loadYaml(file);
+      if (!data) return;
+
+      const featureId = getString(data, 'feature_id');
+      if (!featureId || featureId === 'F-##') return;
+
+      const method = getString(data, 'method').toUpperCase();
+      const pathMatch = file.match(/\/paths\/(.+)\/api-contract\.yaml$/);
+      const path = pathMatch ? '/' + pathMatch[1].replace(/\[([^\]]+)\]/g, '{$1}') : '';
+
+      if (!featureApis!.has(featureId)) {
+        featureApis!.set(featureId, []);
+      }
+      featureApis!.get(featureId)!.push({ method, path });
+    });
+  }
+
   features.forEach(f => {
     const statusIcon = f.status === 'complete' ? '✓' : f.status === 'in-progress' ? '●' : '○';
     console.log(
       `${f.feature_id.padEnd(10)} ${f.title.substring(0, 40).padEnd(40)} ${String(f.progress).padStart(3)}%      ${statusIcon} ${f.status}`
     );
+
+    // Show APIs if requested
+    if (featureApis && featureApis.has(f.feature_id)) {
+      const apis = featureApis.get(f.feature_id)!;
+      apis.forEach(api => {
+        console.log(`           └─ ${api.method.padEnd(6)} ${api.path}`);
+      });
+    }
   });
 
   console.log('━'.repeat(80));
   console.log(`Found ${features.length} matching features`);
 }
 
-// APIs
-interface ApiEndpoint {
-  method: string;
-  path: string;
-  summary: string;
-}
-
-function parseApiEndpoints(data: Record<string, unknown>): ApiEndpoint[] {
-  const paths = data.paths as Record<string, Record<string, unknown>> | undefined;
-  if (!paths) return [];
-
-  const endpoints: ApiEndpoint[] = [];
-
-  for (const [path, methods] of Object.entries(paths)) {
-    for (const [method, details] of Object.entries(methods)) {
-      const detailsObj = details as Record<string, unknown>;
-      const summary = getString(detailsObj, 'summary') || 'No description';
-      endpoints.push({ method: method.toUpperCase(), path, summary });
-    }
-  }
-
-  return endpoints;
-}
-
-function listApis(
-  docsDir: string,
-  options: { format: string; filterMethod: string; filterPath: string; baseUrl: string }
-): void {
-  const apiFile = join(docsDir, 'api-contracts.yaml');
-  const data = loadYaml(apiFile);
-
-  if (!data) {
-    console.log(`Error: File '${apiFile}' not found`);
-    process.exit(1);
-  }
-
-  const info = data.info as Record<string, unknown> | undefined;
-  const title = info ? getString(info, 'title') : 'API';
-  const version = info ? getString(info, 'version') : '1.0.0';
-
-  let endpoints = parseApiEndpoints(data);
-
-  if (options.filterMethod) {
-    endpoints = endpoints.filter(ep => ep.method === options.filterMethod.toUpperCase());
-  }
-
-  if (options.filterPath) {
-    endpoints = endpoints.filter(ep => ep.path.includes(options.filterPath));
-  }
-
-  if (options.format === 'json') {
-    endpoints.forEach(ep => {
-      console.log(JSON.stringify(ep));
-    });
-    return;
-  }
-
-  if (options.format === 'curl') {
-    endpoints.forEach(ep => {
-      const method = ep.method;
-      if (method === 'GET' || method === 'DELETE') {
-        console.log(`curl -X ${method} "${options.baseUrl}${ep.path}"`);
-      } else {
-        console.log(`curl -X ${method} "${options.baseUrl}${ep.path}" \\`);
-        console.log(`  -H "Content-Type: application/json" \\`);
-        console.log(`  -d '{"key": "value"}'`);
-      }
-      console.log('');
-    });
-    return;
-  }
-
-  if (options.format === 'markdown') {
-    console.log(`# ${title} v${version}\n`);
-    endpoints.forEach(ep => {
-      console.log(`### ${ep.method} \`${ep.path}\``);
-      console.log(ep.summary);
-      console.log('');
-    });
-    return;
-  }
-
-  console.log('━'.repeat(80));
-  console.log(`${title} v${version}`);
-  console.log('━'.repeat(80));
-  console.log('');
-
-  endpoints.forEach(ep => {
-    const methodPadded = ep.method.padEnd(6);
-    console.log(`${methodPadded} ${ep.path.padEnd(40)} ${ep.summary.substring(0, 60)}`);
-  });
-
-  console.log('');
-  console.log('━'.repeat(80));
-  console.log(`Found ${endpoints.length} endpoint(s)`);
-}
 
 // Stories
 interface StoryData {
@@ -385,6 +322,125 @@ function listFlows(docsDir: string, options: { format: string; filterPersona: st
   console.log(`Found ${flows.length} flow file(s)`);
 }
 
+// APIs
+interface ApiData {
+  file: string;
+  path: string;
+  method: string;
+  summary: string;
+  description: string;
+  feature_id: string;
+}
+
+function parseApi(file: string): ApiData | null {
+  const data = loadYaml(file);
+  if (!data) return null;
+
+  const method = getString(data, 'method').toUpperCase();
+  const summary = getString(data, 'summary');
+  const description = getString(data, 'description');
+  const feature_id = getString(data, 'feature_id');
+
+  // Extract path from file structure: docs/api-contracts/paths/user/[id]/profile/api-contract.yaml
+  // Should become: /user/{id}/profile
+  const pathMatch = file.match(/\/paths\/(.+)\/api-contract\.yaml$/);
+  let path = pathMatch ? pathMatch[1] : basename(file, '.yaml');
+
+  // Convert [id] to {id} for OpenAPI style
+  path = '/' + path.replace(/\[([^\]]+)\]/g, '{$1}');
+
+  return {
+    file,
+    path,
+    method,
+    summary,
+    description,
+    feature_id,
+  };
+}
+
+function listApis(
+  docsDir: string,
+  options: { format: string; filterMethod: string; filterPath: string; filterFeature: string; baseUrl: string }
+): void {
+  const apisDir = join(docsDir, 'api-contracts');
+  const files = findYamlFiles(apisDir);
+
+  if (files.length === 0) {
+    console.log(`No API contract files found in ${apisDir}`);
+    return;
+  }
+
+  let apis = files.map(parseApi).filter((a): a is ApiData => a !== null);
+
+  if (options.filterMethod) {
+    apis = apis.filter(a => a.method === options.filterMethod.toUpperCase());
+  }
+
+  if (options.filterPath) {
+    apis = apis.filter(a => a.path.includes(options.filterPath));
+  }
+
+  if (options.filterFeature) {
+    apis = apis.filter(a => a.feature_id === options.filterFeature);
+  }
+
+  if (options.format === 'json') {
+    apis.forEach(a => {
+      console.log(
+        JSON.stringify({
+          method: a.method,
+          path: a.path,
+          summary: a.summary,
+          description: a.description,
+          feature_id: a.feature_id,
+          file: a.file,
+        })
+      );
+    });
+    return;
+  }
+
+  if (options.format === 'curl') {
+    apis.forEach(a => {
+      const url = `${options.baseUrl}${a.path}`;
+      console.log(`curl -X ${a.method} "${url}" \\`);
+      console.log(`  -H "Content-Type: application/json" \\`);
+      console.log(`  -H "Authorization: Bearer YOUR_TOKEN"`);
+      if (a.method === 'POST' || a.method === 'PUT' || a.method === 'PATCH') {
+        console.log(`  -d '{}'`);
+      }
+      console.log('');
+    });
+    return;
+  }
+
+  if (options.format === 'markdown') {
+    apis.forEach(a => {
+      console.log(`- **${a.method}** \`${a.path}\``);
+      if (a.summary) {
+        console.log(`  - ${a.summary}`);
+      }
+    });
+    return;
+  }
+
+  console.log(`API Contracts in ${apisDir}`);
+  console.log('━'.repeat(90));
+  console.log(`${'Method'.padEnd(8)} ${'Path'.padEnd(35)} ${'Feature'.padEnd(8)} Summary`);
+  console.log('━'.repeat(90));
+
+  apis.forEach(a => {
+    const featureDisplay = a.feature_id || '-';
+    console.log(
+      `${a.method.padEnd(8)} ${a.path.substring(0, 35).padEnd(35)} ${featureDisplay.padEnd(8)} ${a.summary.substring(0, 30)}`
+    );
+  });
+
+  console.log('━'.repeat(90));
+  console.log(`Found ${apis.length} API endpoints`);
+}
+
 // Export list handler
 export function list(docsDir: string, type: string, options: Record<string, unknown>): void {
   switch (type) {
@@ -394,6 +450,7 @@ export function list(docsDir: string, type: string, options: Record<string, unkn
         format: (options.format as string) || 'summary',
         filterStatus: (options.status as string) || '',
         sortBy: (options.sort as string) || 'id',
+        showApis: options.showApis as boolean || false,
       });
       break;
 
@@ -402,6 +459,7 @@ export function list(docsDir: string, type: string, options: Record<string, unkn
         format: (options.format as string) || 'summary',
         filterMethod: (options.method as string) || '',
         filterPath: (options.path as string) || '',
+        filterFeature: (options.feature as string) || '',
         baseUrl: (options.baseUrl as string) || 'http://localhost:3000',
       });
       break;
