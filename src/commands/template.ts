@@ -1,11 +1,10 @@
-import { readFileSync, existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 type TemplateType =
   | 'product-requirements'
   | 'system-design'
-  | 'api-contracts'
-  | 'data-plan'
+  | 'api-contract'
   | 'design-spec'
   | 'user-flow'
   | 'user-story'
@@ -13,13 +12,13 @@ type TemplateType =
   | 'requirements'
   | 'investigation-topic'
   | 'plan'
+  | 'epic-plan'
   | 'claude';
 
 const TEMPLATE_MAP: Record<TemplateType, string> = {
   'product-requirements': 'product-requirements.yaml',
   'system-design': 'system-design.yaml',
-  'api-contracts': 'api-contracts.yaml',
-  'data-plan': 'data-plan.yaml',
+  'api-contract': 'api-contract.yaml',
   'design-spec': 'design-spec.yaml',
   'user-flow': 'user-flow.yaml',
   'user-story': 'user-story.yaml',
@@ -27,6 +26,7 @@ const TEMPLATE_MAP: Record<TemplateType, string> = {
   'requirements': 'requirements.yaml',
   'investigation-topic': 'investigation-topic.yaml',
   'plan': 'plan.yaml',
+  'epic-plan': 'epic-plan.yaml',
   'claude': 'CLAUDE-template.md',
 };
 
@@ -40,8 +40,7 @@ export function template(type: string): void {
     console.log('  Root documents:');
     console.log('    product-requirements    Product Requirements Document');
     console.log('    system-design           System Design Document');
-    console.log('    api-contracts           API Contracts (OpenAPI)');
-    console.log('    data-plan               Data Plan (Analytics & Events)');
+    console.log('    api-contract            API Contract Document');
     console.log('    design-spec             Design Specification');
     console.log('');
     console.log('  Multi-file documents:');
@@ -53,6 +52,7 @@ export function template(type: string): void {
     console.log('  Planning & Investigation:');
     console.log('    investigation-topic     Investigation/Context Template');
     console.log('    plan                    Implementation Plan Template');
+    console.log('    epic-plan               Epic Plan Template');
     console.log('');
     console.log('  Meta:');
     console.log('    claude                  CLAUDE.md Quick Reference');

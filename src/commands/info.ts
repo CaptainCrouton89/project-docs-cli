@@ -96,17 +96,12 @@ export function info(docsDir: string): void {
   }
 
   // API Contracts
-  const apiFile = join(docsDir, 'api-contracts.yaml');
-  if (existsSync(apiFile)) {
-    const apiData = loadYaml(apiFile);
-    if (apiData) {
-      const paths = apiData.paths as Record<string, unknown> | undefined;
-      const endpointCount = paths ? Object.keys(paths).length : 0;
-
-      console.log('API Contracts:');
-      console.log(`  Endpoints: ${endpointCount}`);
-      console.log('');
-    }
+  const apiDir = join(docsDir, 'api-contracts');
+  if (existsSync(apiDir)) {
+    const apiFiles = findYamlFiles(apiDir);
+    console.log('API Contracts:');
+    console.log(`  Endpoints: ${apiFiles.length}`);
+    console.log('');
   }
 
   // System Design
