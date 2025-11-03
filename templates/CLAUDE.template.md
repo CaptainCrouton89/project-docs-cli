@@ -7,7 +7,7 @@ YAML-based specs in `docs/`. CLI tool `pdocs` validates and queries documentatio
 ```
 docs/
 ├── product-requirements.yaml  ├── system-design.yaml  ├── design-spec.yaml
-├── api-contracts.yaml         ├── data-plan.yaml
+├── api-contracts/paths/**/*.yaml
 ├── user-flows/*.yaml          ├── user-stories/*.yaml  ├── feature-specs/*.yaml
 └── CLAUDE.md (this file, auto-installed by pdocs)
 ```
@@ -54,7 +54,7 @@ pdocs info                                 # Display project summary
 pdocs template product-requirements        # Get PRD template
 pdocs template user-story                  # Get user story template
 pdocs template feature-spec                # Get feature spec template
-# Other templates: system-design, api-contracts, data-plan, design-spec, user-flow
+# Other templates: system-design, api-contract, design-spec, user-flow
 ```
 
 All commands support `--help` for detailed usage information.
@@ -69,7 +69,7 @@ All commands support `--help` for detailed usage information.
 
 ## Workflow Order
 
-PRD → User Flows → User Stories → Feature Specs → System Design → API Contracts → Data Plan → Design Spec → Traceability Pass
+PRD → User Flows → User Stories → Feature Specs → System Design → API Contracts → Design Spec → Traceability Pass
 
 Check existing files first (`./run.sh list-*`) before creating. Re-read upstream docs at each step.
 
@@ -87,7 +87,6 @@ Check existing files first (`./run.sh list-*`) before creating. Re-read upstream
 - User Stories → `feature_id`, flows
 - Feature Specs → story IDs, PRD
 - API Contracts → feature IDs
-- Data Plan → PRD metrics
 
 Run `cd docs && ./run.sh check-project` regularly. Fix errors before next step.
 

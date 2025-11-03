@@ -11,12 +11,12 @@ Located in `templates/` root:
 - `product-requirements.yaml` - PRD with project goals and feature list
 - `system-design.yaml` - Tech stack, components, architecture diagrams
 - `api-contracts.yaml` - OpenAPI-formatted endpoint definitions
-- `data-plan.yaml` - Analytics events, metrics, data sources
 - `design-spec.yaml` - UI design tokens, brand guidelines, color palettes
 
 ### Multi-File Document Templates
 Located in `templates/` root (each represents one file in a multi-file collection):
 - `user-flow.yaml` - User journey map, personas, primary/secondary flows
+- `api-contract.yaml` - 
 - `user-story.yaml` - Story ID, "as a" statement, acceptance criteria
 - `feature-spec.yaml` - Feature ID, functional overview, API endpoints, QA notes
 - `requirements.yaml` - Detailed feature requirements, edge cases, data needs

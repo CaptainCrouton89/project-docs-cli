@@ -16,7 +16,7 @@ Codebase Architecture & Technical Guide
 ### Target Workflow
 ```
 Planning Phase:
-PRD → User Flows → User Stories → Feature Specs → System Design → API Contracts → Data Plan → Design Spec
+PRD → User Flows → User Stories → Feature Specs → System Design → API Contracts → Design Spec
 
 Implementation Phase (per feature):
 Investigation → Requirements → Plan → Implementation
@@ -63,9 +63,11 @@ cli.ts (router)
 docs/
 ├── product-requirements.yaml      # Root: Project goals, features list
 ├── system-design.yaml             # Root: Tech stack, components, architecture
-├── api-contracts.yaml             # Root: API endpoints (OpenAPI format)
-├── data-plan.yaml                 # Root: Analytics, events, metrics
 ├── design-spec.yaml               # Root: UI/UX guidelines, design tokens
+├── api-contracts/                 # Multi-file: API endpoints per file
+│   └── paths/                     # Directory structure mirrors API paths
+│       ├── user/[id]/profile/api-contract.yaml
+│       └── posts/api-contract.yaml
 ├── user-flows/*.yaml              # Multi-file: User journeys, personas
 ├── user-stories/*.yaml            # Multi-file: Story ID, feature ref, ACs
 ├── feature-specs/*.yaml           # Multi-file: Feature ID, implementation details
@@ -132,10 +134,12 @@ All file I/O and YAML parsing is centralized here.
    - User Stories: story files valid, "as a" statement complete
    - Feature Specs: file count, status tracking (complete/in-progress/incomplete)
    - System Design: file exists, goal/tech stack defined
-   - API Contracts: endpoint count, method/path parsing
-   - Data Plan: data sources defined
+   - API Contracts: directory exists, contract files have method/summary
    - Design Spec: design goals specified
-3. Cross-reference validation: Check PRD feature IDs match feature spec files
+3. Cross-reference validation:
+   - Check PRD feature IDs have matching feature spec files
+   - Check user stories reference valid feature IDs
+   - Check API contracts reference valid feature IDs (via feature_id field)
 4. Output summary with error/warning counts, exit code 0/1
 
 **Output Modes:**
@@ -156,18 +160,20 @@ Handles 4 document types with type-specific formatters.
 - Parse: `feature_id`, `title`, `status`, `summary`, `progress` (from implementation_status)
 - Filters: `--status`, `--all` (default: hide complete)
 - Sorts: `--sort` by id|status|title
+- Options: `--show-apis` - Display related API endpoints under each feature
 - Formats:
-  - `summary` (default): Table with ID, title, progress %, status icon
+  - `summary` (default): Table with ID, title, progress %, status icon (optionally shows APIs if --show-apis is set)
   - `stats`: Completion percentages and counts
   - `json`: One-per-line JSON objects
 
 **APIs:**
-- Parse: `method`, `path`, `summary` from `paths[path][method]` structure
-- Filters: `--method` (GET|POST|etc), `--path` (substring match)
+- Parse: `method`, `summary`, `description`, `feature_id` from individual contract files; `path` extracted from file location
+- Path extraction: `docs/api-contracts/paths/user/[id]/profile/api-contract.yaml` → `/user/{id}/profile`
+- Filters: `--method` (GET|POST|etc), `--path` (substring match), `--feature` (filter by feature ID)
 - Formats:
-  - `summary` (default): Table of methods, paths, descriptions
+  - `summary` (default): Table showing method, path, feature, and summary
   - `curl`: Generate `curl` commands with placeholders
-  - `json`: One-per-line JSON
+  - `json`: One-per-line JSON with feature_id
   - `markdown`: Markdown formatted endpoint list
 - Options: `--base-url` for curl generation (default: http://localhost:3000)
 
@@ -190,16 +196,17 @@ Handles 4 document types with type-specific formatters.
 
 **Output Structure:**
 - `overview.md` - Project summary from PRD
-- `features.md` - All feature specs with core logic and API endpoints
-- `api-reference.md` - Detailed API documentation with responses
+- `features.md` - All feature specs with core logic; cross-links to API endpoints in api-reference.md
+- `api-reference.md` - API documentation grouped by feature with cross-links back to features.md
 - `architecture.md` - System design, components, tech stack
 - `README.md` - Index with TOC
 
 **Flow:**
 1. Create output directory (default: `docs/generated/`)
 2. Parse each YAML source and extract relevant fields
-3. Generate markdown with proper headings and sections
-4. Write files to output directory
+3. For features.md: Look up API contracts with matching feature_id and create markdown links
+4. For api-reference.md: Group APIs by feature_id, add feature cross-links, separate uncategorized section
+5. Write files to output directory with proper anchor tags for cross-referencing
 
 **Options:**
 - `-o, --output` - Target directory (default: docs/generated)
@@ -209,6 +216,7 @@ Handles 4 document types with type-specific formatters.
 **Data Extraction:**
 - Uses nested field accessors to handle complex YAML structures
 - Handles arrays of objects (components, endpoints, features)
+- Finds API contracts by scanning api-contracts/ directory for matching feature_id
 - Gracefully skips missing sections with warnings
 
 ### 4. `info` Command - Project Summary
@@ -232,11 +240,10 @@ Quick overview of documentation completeness:
 Root documents:
   product-requirements    - PRD with features list
   system-design          - Components, tech stack, diagrams
-  api-contracts          - OpenAPI structure
-  data-plan              - Analytics events, metrics
   design-spec            - UI design tokens, brand guidelines
 
 Multi-file documents:
+  api-contract           - API endpoint contract (one per endpoint)
   user-flow              - Journey map, personas, steps
   user-story             - Story ID, "as a/I want/so that", ACs
   feature-spec           - Feature ID, functional overview, APIs, QA
