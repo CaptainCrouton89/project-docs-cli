@@ -108,19 +108,38 @@ ${summary}
 
 `;
 
-    const detailedDesign = data.detailed_design as Record<string, unknown> | undefined;
-    const apis = detailedDesign ? getArray(detailedDesign, 'apis') : [];
+    // Find API contracts for this feature
+    const apiDir = join(docsDir, 'api-contracts');
+    if (existsSync(apiDir)) {
+      const apiFiles = findYamlFiles(apiDir);
+      let foundApis = false;
 
-    apis.forEach(api => {
-      if (typeof api === 'object' && api !== null) {
-        const apiObj = api as Record<string, unknown>;
-        const method = getString(apiObj, 'method');
-        const endpoint = getString(apiObj, 'endpoint');
-        if (method && endpoint) {
-          markdown += `- **${method.toUpperCase()}** \`${endpoint}\`\n`;
+      apiFiles.forEach(apiFile => {
+        const apiData = loadYaml(apiFile);
+        if (!apiData) return;
+
+        const apiFeatureId = getString(apiData, 'feature_id');
+        if (apiFeatureId !== featureId) return;
+
+        foundApis = true;
+        const method = getString(apiData, 'method').toUpperCase();
+        const pathMatch = apiFile.match(/\/paths\/(.+)\/api-contract\.yaml$/);
+        const path = pathMatch ? '/' + pathMatch[1].replace(/\[([^\]]+)\]/g, '{$1}') : '';
+        const summary = getString(apiData, 'summary');
+
+        // Create anchor link for cross-reference
+        const anchor = `${method.toLowerCase()}-${path.replace(/[^a-z0-9]+/g, '')}`;
+        markdown += `- **${method}** [\`${path}\`](./api-reference.md#${anchor})`;
+        if (summary) {
+          markdown += ` - ${summary}`;
         }
+        markdown += '\n';
+      });
+
+      if (!foundApis) {
+        markdown += '_No API endpoints defined for this feature._\n';
       }
-    });
+    }
 
     markdown += '\n---\n\n';
   }
@@ -130,61 +149,207 @@ ${summary}
 }
 
 function generateApiDocs(docsDir: string, outputDir: string): void {
-  const apiFile = join(docsDir, 'api-contracts.yaml');
+  const apiDir = join(docsDir, 'api-contracts');
   const outputFile = join(outputDir, 'api-reference.md');
 
-  if (!existsSync(apiFile)) {
-    console.log('⚠ API contracts file not found, skipping');
+  if (!existsSync(apiDir)) {
+    console.log('⚠ API contracts directory not found, skipping');
     return;
   }
 
   console.log('→ Generating API documentation...');
 
-  const data = loadYaml(apiFile);
-  if (!data) return;
-
-  const info = data.info as Record<string, unknown> | undefined;
-  const apiTitle = info ? getString(info, 'title') : 'API';
-  const apiVersion = info ? getString(info, 'version') : '1.0.0';
-
   let markdown = `# API Reference
-
-**${apiTitle}** - Version ${apiVersion}
-
-## Endpoints
 
 `;
 
-  const paths = data.paths as Record<string, Record<string, unknown>> | undefined;
-  if (paths) {
-    for (const [path, methods] of Object.entries(paths)) {
-      for (const [method, details] of Object.entries(methods)) {
-        const detailsObj = details as Record<string, unknown>;
-        const summary = getString(detailsObj, 'summary');
-        const description = getString(detailsObj, 'description');
+  const apiFiles = findYamlFiles(apiDir);
 
-        markdown += `\n### ${method.toUpperCase()} \`${path}\`\n\n`;
+  if (apiFiles.length === 0) {
+    console.log('⚠ No API contract files found, skipping');
+    return;
+  }
 
-        if (summary) {
-          markdown += `${summary}\n\n`;
+  // Parse APIs and group by feature
+  const apisByFeature = new Map<string, Array<{ path: string; method: string; file: string; data: Record<string, unknown> }>>();
+  const orphanedApis: Array<{ path: string; method: string; file: string; data: Record<string, unknown> }> = [];
+
+  for (const file of apiFiles) {
+    const data = loadYaml(file);
+    if (!data) continue;
+
+    // Extract path from file structure
+    const pathMatch = file.match(/\/paths\/(.+)\/api-contract\.yaml$/);
+    let path = pathMatch ? pathMatch[1] : basename(file, '.yaml');
+    path = '/' + path.replace(/\[([^\]]+)\]/g, '{$1}');
+
+    const method = getString(data, 'method').toUpperCase();
+    const featureId = getString(data, 'feature_id');
+
+    const apiEntry = { path, method, file, data };
+
+    if (featureId && featureId !== 'F-##') {
+      if (!apisByFeature.has(featureId)) {
+        apisByFeature.set(featureId, []);
+      }
+      apisByFeature.get(featureId)!.push(apiEntry);
+    } else {
+      orphanedApis.push(apiEntry);
+    }
+  }
+
+  // Sort features
+  const sortedFeatures = Array.from(apisByFeature.keys()).sort();
+
+  // Generate markdown grouped by feature
+  for (const featureId of sortedFeatures) {
+    const apis = apisByFeature.get(featureId)!;
+
+    // Sort APIs within feature by path, then method
+    apis.sort((a, b) => {
+      if (a.path === b.path) {
+        return a.method.localeCompare(b.method);
+      }
+      return a.path.localeCompare(b.path);
+    });
+
+    markdown += `## ${featureId}\n\n`;
+    markdown += `**Feature:** [${featureId}](./features.md#${featureId.toLowerCase()})\n\n`;
+
+    for (const api of apis) {
+      const summary = getString(api.data, 'summary');
+      const description = getString(api.data, 'description');
+
+      // Create anchor for cross-linking
+      const anchor = `${api.method.toLowerCase()}-${api.path.replace(/[^a-z0-9]+/g, '')}`;
+      markdown += `\n### ${api.method} \`${api.path}\` {#${anchor}}\n\n`;
+
+      if (summary) {
+        markdown += `${summary}\n\n`;
+      }
+
+      if (description && description.trim()) {
+        markdown += `${description}\n\n`;
+      }
+
+    // Parameters
+    const parameters = getArray(api.data, 'parameters');
+    if (parameters.length > 0) {
+      markdown += '**Parameters:**\n\n';
+      parameters.forEach(param => {
+        if (typeof param === 'object' && param !== null) {
+          const paramObj = param as Record<string, unknown>;
+          const name = getString(paramObj, 'name');
+          const paramIn = getString(paramObj, 'in');
+          const required = paramObj.required === true;
+          const paramDesc = getString(paramObj, 'description');
+          markdown += `- \`${name}\` (${paramIn})${required ? ' **required**' : ''}: ${paramDesc}\n`;
         }
+      });
+      markdown += '\n';
+    }
 
-        if (description) {
-          markdown += `${description}\n\n`;
+    // Request body
+    const requestBody = api.data.request_body as Record<string, unknown> | undefined;
+    if (requestBody) {
+      const required = requestBody.required === true;
+      markdown += `**Request Body:**${required ? ' **required**' : ''}\n\n`;
+
+      const content = requestBody.content as Record<string, unknown> | undefined;
+      if (content) {
+        for (const [contentType, details] of Object.entries(content)) {
+          markdown += `Content-Type: \`${contentType}\`\n\n`;
         }
+      }
+    }
 
-        const responses = detailsObj.responses as Record<string, unknown> | undefined;
-        if (responses) {
-          markdown += '**Responses:**\n\n';
-          for (const [code, resp] of Object.entries(responses)) {
-            const respObj = resp as Record<string, unknown>;
-            const respDesc = getString(respObj, 'description');
-            markdown += `- \`${code}\`: ${respDesc}\n`;
+    // Responses
+    const responses = api.data.responses as Record<string, unknown> | undefined;
+    if (responses) {
+      markdown += '**Responses:**\n\n';
+      for (const [code, resp] of Object.entries(responses)) {
+        const respObj = resp as Record<string, unknown>;
+        const respDesc = getString(respObj, 'description');
+        markdown += `- \`${code}\`: ${respDesc}\n`;
+      }
+      markdown += '\n';
+    }
+
+      markdown += '---\n';
+    }
+  }
+
+  // Add orphaned APIs section if any exist
+  if (orphanedApis.length > 0) {
+    orphanedApis.sort((a, b) => {
+      if (a.path === b.path) {
+        return a.method.localeCompare(b.method);
+      }
+      return a.path.localeCompare(b.path);
+    });
+
+    markdown += `\n## Uncategorized APIs\n\n`;
+    markdown += `_These endpoints have no feature_id assigned._\n\n`;
+
+    for (const api of orphanedApis) {
+      const summary = getString(api.data, 'summary');
+      const description = getString(api.data, 'description');
+
+      const anchor = `${api.method.toLowerCase()}-${api.path.replace(/[^a-z0-9]+/g, '')}`;
+      markdown += `\n### ${api.method} \`${api.path}\` {#${anchor}}\n\n`;
+
+      if (summary) {
+        markdown += `${summary}\n\n`;
+      }
+
+      if (description && description.trim()) {
+        markdown += `${description}\n\n`;
+      }
+
+      // Parameters
+      const parameters = getArray(api.data, 'parameters');
+      if (parameters.length > 0) {
+        markdown += '**Parameters:**\n\n';
+        parameters.forEach(param => {
+          if (typeof param === 'object' && param !== null) {
+            const paramObj = param as Record<string, unknown>;
+            const name = getString(paramObj, 'name');
+            const paramIn = getString(paramObj, 'in');
+            const required = paramObj.required === true;
+            const paramDesc = getString(paramObj, 'description');
+            markdown += `- \`${name}\` (${paramIn})${required ? ' **required**' : ''}: ${paramDesc}\n`;
+          }
+        });
+        markdown += '\n';
+      }
+
+      // Request body
+      const requestBody = api.data.request_body as Record<string, unknown> | undefined;
+      if (requestBody) {
+        const required = requestBody.required === true;
+        markdown += `**Request Body:**${required ? ' **required**' : ''}\n\n`;
+
+        const content = requestBody.content as Record<string, unknown> | undefined;
+        if (content) {
+          for (const [contentType, details] of Object.entries(content)) {
+            markdown += `Content-Type: \`${contentType}\`\n\n`;
           }
         }
-
-        markdown += '\n---\n';
       }
+
+      // Responses
+      const responses = api.data.responses as Record<string, unknown> | undefined;
+      if (responses) {
+        markdown += '**Responses:**\n\n';
+        for (const [code, resp] of Object.entries(responses)) {
+          const respObj = resp as Record<string, unknown>;
+          const respDesc = getString(respObj, 'description');
+          markdown += `- \`${code}\`: ${respDesc}\n`;
+        }
+        markdown += '\n';
+      }
+
+      markdown += '---\n';
     }
   }
 
@@ -278,7 +443,7 @@ This documentation is automatically generated from YAML specification files.
 This documentation is generated from:
 - Product Requirements: \`${docsDir}/product-requirements.yaml\`
 - Feature Specs: \`${docsDir}/feature-specs/*.yaml\`
-- API Contracts: \`${docsDir}/api-contracts.yaml\`
+- API Contracts: \`${docsDir}/api-contracts/**/*.yaml\`
 - System Design: \`${docsDir}/system-design.yaml\`
 
 To regenerate this documentation, run:
